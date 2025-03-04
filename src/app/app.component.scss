@@ -1,0 +1,25 @@
+.app-container {
+  --app-container-bg-color: #FAFAFA;
+  height: 80%;
+  width: 90%;
+  background-color: var(--app-container-bg-color);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 25px;
+  display: flex;
+  overflow: hidden;
+
+  &__left-panel {
+    height: 100%;
+    width: 70%;
+
+  }
+
+  &__right-panel {
+    height: 100%;
+    width: 30%;
+
+  }
+}
