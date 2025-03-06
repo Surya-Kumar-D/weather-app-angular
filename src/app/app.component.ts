@@ -15,7 +15,8 @@ export class AppComponent {
 
   weatherService = inject(WeatherService);
   @HostListener('click') onClick() {
-    this.weatherService.fetchWeatherData();
+    this.weatherService.getWeatherData("tambaram")
     console.log(this.weatherService.data());
+
   }
 }

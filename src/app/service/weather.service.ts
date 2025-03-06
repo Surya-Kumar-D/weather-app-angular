@@ -1,6 +1,7 @@
 import {AfterViewInit, HostListener, inject, Injectable, OnInit, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
+import {switchMap,of} from 'rxjs';
 
 
 @Injectable({
@@ -8,33 +9,44 @@ import {environment} from '../../environments/environment';
 
 })
 export class WeatherService implements OnInit{
-  private APIURL = `https://api.open-meteo.com/v1/forecast?latitude=30.18&longitude=71.49&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&hourly=temperature_2m,weathercode&timezone=auto
-`;
-
+  private WEATHERURL = `https://api.open-meteo.com/v1/forecast?latitude=<LAT>&longitude=<LONG>&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&hourly=temperature_2m,weathercode&timezone=auto`;
+  private PLACEURL = "https://nominatim.openstreetmap.org/search?q=<PLACE>,%20India&format=json"
   private httpClient = inject(HttpClient);
   data = signal({});
 
 
   constructor() {
-    console.log(environment.apiKey);
 
   }
 
   ngOnInit() {
-    // This will be called when the service is instantiated
-    this.fetchWeatherData();
   }
 
-  // Method to fetch weather data
-  fetchWeatherData() {
-    this.httpClient.get(this.APIURL).subscribe({
-      next: (res) => {
-        this.data.set(res);
-        console.log('Weather data fetched');
+
+
+  getWeatherData(place: string){
+    this.httpClient.get<any[]>(this.PLACEURL.replace("<PLACE>", place)).pipe(
+      switchMap((locationData)=> {
+        console.log(locationData);
+        if(locationData && locationData.length > 0){
+          const lat: string = locationData[0].lat;
+          const lon: string = locationData[0].lon;
+          return this.httpClient.get(this.WEATHERURL.replace("<LAT>",lat).replace("<LONG>",lon))
+
+        }
+        else {
+          return of(null);
+        }
+      })
+    ).subscribe({
+      next:(res)=> {
+      console.log(res);
+      if(res)
+      this.data.set(res);
       },
-      error: (err) => {
-        console.error('Error fetching weather data', err);
+      error: (err)=> {
+        console.log(err);
       }
-    });
+    })
   }
 }
